@@ -1,7 +1,22 @@
 import os
+import sys
 import hashlib
 
 MGIT_DIR = "./.mgit"
+
+def mgit_required(func):
+    '''
+    This decorator is used to make sure the mgit directory exists.
+    '''
+    def wrapper(*args, **kwargs):
+        if not os.path.exists(MGIT_DIR):
+            raise FileNotFoundError("This is not a mgit repository."\
+                                "Use the mgit init command to make this a git repository.")
+        else:
+            return func(*args, **kwargs)
+            
+    return wrapper
+
 
 def init():
     '''
@@ -15,24 +30,19 @@ def init():
         os.makedirs(MGIT_DIR)
         os.makedirs(os.path.join(MGIT_DIR, "objects"))
 
-
+@mgit_required
 def hashObject(filePath):
     '''
     This function is used to create a blob object and store in the
     object database of the mgit repository. 
     '''
-    if not os.path.exists(MGIT_DIR):
-        raise FileNotFoundError("This is not a mgit repository."\
-                                "Use the mgit init command to make this a git repository.")
-    else:
-        with open(filePath, "rb") as file:
-            data = file.read()
-        
-        # oid => object id
-        oid = hashlib.sha1(data).hexdigest()
+    with open(filePath, "rb") as file:
+        data = file.read()
+    
+    # oid => object id
+    oid = hashlib.sha1(data).hexdigest()
+    # Create a blob object in the object database
+    with open(os.path.join(os.getcwd(), MGIT_DIR, "objects", oid), "wb") as file:
+        file.write(data)
 
-        # Create a blob object in the object database
-        with open(os.path.join(os.getcwd(), MGIT_DIR, "objects", oid), "wb") as file:
-            file.write(data)
-
-        return oid
+    return oid
