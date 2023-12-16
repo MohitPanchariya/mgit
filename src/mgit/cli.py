@@ -13,5 +13,13 @@ def init():
         print(exception)
         
 
+@app.command()
+def hash_object(filepath):
+    try:
+        oid = data.hashObject(filepath)
+        print(oid)
+    except FileNotFoundError as exception:
+        print(exception)
+
 if __name__ == "__main__":
     app()
