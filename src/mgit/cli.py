@@ -1,5 +1,6 @@
 import typer
 import os
+import sys
 import data
 
 app = typer.Typer()
@@ -20,6 +21,16 @@ def hash_object(filepath):
         print(oid)
     except FileNotFoundError as exception:
         print(exception)
+
+@app.command()
+def cat_file(object_id):
+    try:
+        blob = data.catFile(object_id)
+        sys.stdout.flush()
+        sys.stdout.buffer.write(blob)
+    except FileNotFoundError as exception:
+        print(exception)
+
 
 if __name__ == "__main__":
     app()

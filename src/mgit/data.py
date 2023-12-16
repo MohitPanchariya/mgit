@@ -46,3 +46,17 @@ def hashObject(filePath):
         file.write(data)
 
     return oid
+
+
+@mgit_required
+def catFile(obejctId):
+    '''
+    This function takes in an object id(sha1 hash) and prints out
+    the content of that blob object
+    '''
+    if not os.path.exists(os.path.join(MGIT_DIR, "objects", obejctId)):
+        raise FileNotFoundError("No blob object found with given object id.")
+    else:
+        sys.stdout.flush()
+        with open(os.path.join(MGIT_DIR, "objects", obejctId), "rb") as blob:
+            return blob.read()
