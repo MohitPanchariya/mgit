@@ -1,5 +1,4 @@
 import os
-import sys
 import hashlib
 
 MGIT_DIR = "./.mgit"
@@ -31,14 +30,17 @@ def init():
         os.makedirs(os.path.join(MGIT_DIR, "objects"))
 
 @mgit_required
-def hashObject(filePath):
+def hashObject(filePath, type_ = "blob"):
     '''
-    This function is used to create a blob object and store in the
+    This function is used to create an object and store in the
     object database of the mgit repository. 
+    By default, the type is assumed to be blob.
     '''
     with open(filePath, "rb") as file:
         data = file.read()
     
+    # Add type tag
+    data = type_.encode() + b"\x00" + data
     # oid => object id
     oid = hashlib.sha1(data).hexdigest()
     # Create a blob object in the object database
@@ -49,14 +51,20 @@ def hashObject(filePath):
 
 
 @mgit_required
-def catFile(obejctId):
+def getObject(obejctId, expected = "blob"):
     '''
-    This function takes in an object id(sha1 hash) and prints out
-    the content of that blob object
+    This function takes in an object id(sha1 hash) and returns the
+    content of the object.
     '''
     if not os.path.exists(os.path.join(MGIT_DIR, "objects", obejctId)):
-        raise FileNotFoundError("No blob object found with given object id.")
+        raise FileNotFoundError("No object found with given object id.")
     else:
-        sys.stdout.flush()
-        with open(os.path.join(MGIT_DIR, "objects", obejctId), "rb") as blob:
-            return blob.read()
+        with open(os.path.join(MGIT_DIR, "objects", obejctId), "rb") as file:
+            object = file.read()
+        
+        type_, _, data = object.partition(b"\x00")
+        type_ = type_.decode ()
+
+        if expected is not None:
+            assert type_ == expected, f'Expected {expected}, got {type_}'
+        return data

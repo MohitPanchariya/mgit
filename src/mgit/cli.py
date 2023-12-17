@@ -25,7 +25,7 @@ def hash_object(filepath):
 @app.command()
 def cat_file(object_id):
     try:
-        blob = data.catFile(object_id)
+        blob = data.getObject(object_id)
         sys.stdout.flush()
         sys.stdout.buffer.write(blob)
     except FileNotFoundError as exception:
