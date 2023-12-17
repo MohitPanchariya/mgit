@@ -2,6 +2,7 @@ import typer
 import os
 import sys
 import data
+import base
 
 app = typer.Typer()
 
@@ -31,6 +32,13 @@ def cat_file(object_id):
     except FileNotFoundError as exception:
         print(exception)
 
+
+@app.command()
+def write_tree():
+    try:
+        base.writeTree()
+    except FileNotFoundError as exception:
+        print(exception)
 
 if __name__ == "__main__":
     app()
