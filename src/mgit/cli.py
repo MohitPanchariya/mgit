@@ -18,15 +18,18 @@ def init():
 @app.command()
 def hash_object(filepath):
     try:
-        oid = data.hashObject(filepath)
+        with open(filepath, "rb") as file:
+            object = file.read()
+        
+        oid = data.hashObject(object)
         print(oid)
     except FileNotFoundError as exception:
         print(exception)
 
 @app.command()
-def cat_file(object_id):
+def cat_file(object_id, type = "blob"):
     try:
-        blob = data.getObject(object_id)
+        blob = data.getObject(object_id, expected = type)
         sys.stdout.flush()
         sys.stdout.buffer.write(blob)
     except FileNotFoundError as exception:

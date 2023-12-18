@@ -30,14 +30,12 @@ def init():
         os.makedirs(os.path.join(MGIT_DIR, "objects"))
 
 @mgit_required
-def hashObject(filePath, type_ = "blob"):
+def hashObject(data, type_ = "blob"):
     '''
     This function is used to create an object and store in the
     object database of the mgit repository. 
     By default, the type is assumed to be blob.
     '''
-    with open(filePath, "rb") as file:
-        data = file.read()
     
     # Add type tag
     data = type_.encode() + b"\x00" + data
