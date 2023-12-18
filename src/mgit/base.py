@@ -40,6 +40,39 @@ def writeTree(directory = "."):
 
     return data.hashObject(tree.encode(), type_= "tree")
 
+
+@data.mgit_required
+def readTree(objectId, basePath = ""):
+    objectPath = os.path.join(".mgit", "objects", objectId)
+
+    if not os.path.exists(objectPath):
+        raise FileNotFoundError("Tree with given object id doesn't exist.")
+    
+    with open(objectPath, "rb") as file:
+        treeObject = file.read()
+    
+    #Children array stores all the entries present in this tree object(its chidren)
+    children = data.parseTreeObject(treeObject)
+    
+    for child in children:
+        type_ = child["type_"]
+        name = child["name"]
+        oid = child["oid"]
+
+        #If the object is a blob, create a file and write
+        #the blob to the file
+        if type_ == "blob":
+            blob = data.getObject(oid, "blob")
+            with open(os.path.join(basePath, name), "wb") as file:
+                file.write(blob)
+        elif type_ == "tree":
+            os.makedirs(name, exist_ok = True)
+            readTree(
+                objectId = oid, 
+                basePath = os.path.join(basePath, name)
+            )
+
+
 def isIgnored(path):
     splitPath = os.path.split(path)
     if ".mgit" in splitPath[1]:

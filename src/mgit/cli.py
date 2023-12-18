@@ -44,5 +44,12 @@ def write_tree():
     except FileNotFoundError as exception:
         print(exception)
 
+@app.command()
+def read_tree(tree_object_id):
+    try:
+        base.readTree(tree_object_id)
+    except FileNotFoundError as exception:
+        print(exception)
+
 if __name__ == "__main__":
     app()

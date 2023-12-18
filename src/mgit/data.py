@@ -36,7 +36,7 @@ def hashObject(data, type_ = "blob"):
     object database of the mgit repository. 
     By default, the type is assumed to be blob.
     '''
-    
+
     # Add type tag
     data = type_.encode() + b"\x00" + data
     # oid => object id
@@ -49,15 +49,15 @@ def hashObject(data, type_ = "blob"):
 
 
 @mgit_required
-def getObject(obejctId, expected = "blob"):
+def getObject(objectId, expected = "blob"):
     '''
     This function takes in an object id(sha1 hash) and returns the
     content of the object.
     '''
-    if not os.path.exists(os.path.join(MGIT_DIR, "objects", obejctId)):
+    if not os.path.exists(os.path.join(MGIT_DIR, "objects", objectId)):
         raise FileNotFoundError("No object found with given object id.")
     else:
-        with open(os.path.join(MGIT_DIR, "objects", obejctId), "rb") as file:
+        with open(os.path.join(MGIT_DIR, "objects", objectId), "rb") as file:
             object = file.read()
         
         type_, _, data = object.partition(b"\x00")
@@ -66,3 +66,24 @@ def getObject(obejctId, expected = "blob"):
         if expected is not None:
             assert type_ == expected, f'Expected {expected}, got {type_}'
         return data
+    
+
+def parseTreeObject(treeObj):
+    #Get the data of the tree object
+    type_, _, data = treeObj.partition(b"\x00")
+
+    if type_ != b"tree":
+        raise Exception(f"Expected a tree object. Received: {type_}")
+    
+    #Entries will store the tokenised data
+    #Each element in the children array is a dictionary, 
+    #which consists of type of object, object id and object name
+    children = []
+
+    for line in data.splitlines():
+        words = line.split()
+        children.append({
+            "type_": words[0].decode(), "oid": words[1].decode(), "name": words[2].decode()
+        })
+
+    return children
