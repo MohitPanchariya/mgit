@@ -42,7 +42,12 @@ def writeTree(directory = "."):
 
 
 @data.mgit_required
-def readTree(objectId, basePath = ""):
+def readTree(objectId):
+    _emptyDirectory()
+    _createTree(objectId, basePath = "")
+
+
+def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
 
     if not os.path.exists(objectPath):
@@ -67,14 +72,41 @@ def readTree(objectId, basePath = ""):
                 file.write(blob)
         elif type_ == "tree":
             os.makedirs(name, exist_ok = True)
-            readTree(
+            _createTree(
                 objectId = oid, 
                 basePath = os.path.join(basePath, name)
             )
 
 
+def _emptyDirectory():
+    '''
+    Empty the current directory
+    '''
+    for root, dirnames, filenames in os.walk(".", topdown = False):
+        for filename in filenames:
+            path = os.path.join(root, filename)
+            if isIgnored(path):
+                continue
+            
+            print(path)
+            os.remove(path)
+        for dirname in dirnames:
+            path = os.path.join(root, dirname)
+            if isIgnored(path):
+                continue
+
+            try:
+                print(path)
+                os.rmdir(path)
+            except (FileNotFoundError, OSError):
+                # Since there are can be ignored files, in directories
+                # the directory may not be empty and deletion might
+                # fail which is the correct behaviour
+                pass
+
 def isIgnored(path):
     splitPath = os.path.split(path)
-    if ".mgit" in splitPath[1]:
-        return True
+    for subPath in splitPath:
+        if ".mgit" in subPath:
+            return True
     return False
