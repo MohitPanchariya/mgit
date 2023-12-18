@@ -39,7 +39,8 @@ def cat_file(object_id, type = "blob"):
 @app.command()
 def write_tree():
     try:
-        base.writeTree()
+        oid = base.writeTree()
+        print(oid)
     except FileNotFoundError as exception:
         print(exception)
 
