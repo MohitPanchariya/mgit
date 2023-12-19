@@ -51,5 +51,12 @@ def read_tree(tree_object_id):
     except FileNotFoundError as exception:
         print(exception)
 
+@app.command()
+def commit(message):
+    try:
+        base.commit(message)
+    except Exception as exception:
+        print(exception)
+
 if __name__ == "__main__":
     app()
