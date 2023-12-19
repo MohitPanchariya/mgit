@@ -1,6 +1,6 @@
 import data
 import os
-
+import textwrap
 
 @data.mgit_required
 def commit(message):
@@ -63,6 +63,23 @@ def readTree(objectId):
     _emptyDirectory()
     _createTree(objectId, basePath = "")
 
+@data.mgit_required
+def log(objectId = None):
+    if not objectId:
+        objectId = data.getHead()
+
+    while objectId:
+        commit = data.getCommit(objectId)
+
+        print(f"commit {objectId}")
+        lines = textwrap.wrap(commit["message"])
+        for line in lines:
+            print(textwrap.indent(line, "   "))
+
+        if "parent" in commit:
+            objectId = commit["parent"]
+        else:
+            objectId = None
 
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)

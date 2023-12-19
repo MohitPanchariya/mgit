@@ -58,5 +58,10 @@ def commit(message):
     except Exception as exception:
         print(exception)
 
+
+@app.command()
+def log(object_id = None):
+    base.log(object_id)
+
 if __name__ == "__main__":
     app()

@@ -83,6 +83,36 @@ def getHead():
             head = file.read().strip()
     return head
 
+def getCommit(objectId):
+    '''
+    This function returns a dictionary representing a commit object.
+    commit = {
+        tree: object-id of the tree,
+        parent: object-id of the previous commit, if it exists,
+        message: The commit message
+    }
+    '''
+    data = getObject(objectId, expected = "commit").decode()
+
+    commit = {}
+
+    lines = iter(data.splitlines())
+
+    for line in lines:
+        if line == "":
+            break
+        key, value = line.split(" ", 1)
+        if key == "tree":
+            commit["tree"] = value
+        elif key == "parent":
+            commit["parent"] = value
+        else:
+            raise Exception(f"Unknow Key found: {key}")
+    
+    commit["message"] = "\n".join(lines)
+
+    return commit
+
 def parseTreeObject(treeObj):
     #Get the data of the tree object
     type_, _, data = treeObj.partition(b"\x00")
