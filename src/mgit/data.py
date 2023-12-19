@@ -68,6 +68,21 @@ def getObject(objectId, expected = "blob"):
         return data
     
 
+@mgit_required
+def setHead(objectId):
+    with open(os.path.join(MGIT_DIR, "HEAD"), "w") as file:
+        file.write(objectId)
+
+
+@mgit_required
+def getHead():
+    head = None
+    headPath = os.path.join(MGIT_DIR, "HEAD")
+    if os.path.exists(headPath):
+        with open(headPath, "r") as file:
+            head = file.read().strip()
+    return head
+
 def parseTreeObject(treeObj):
     #Get the data of the tree object
     type_, _, data = treeObj.partition(b"\x00")

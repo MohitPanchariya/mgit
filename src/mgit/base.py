@@ -6,13 +6,18 @@ import os
 def commit(message):
     # tree object-id
     commitObject = f"tree {writeTree()}\n"
+    # parent commit hash
+    parent = data.getHead()
+    if parent:
+        commitObject += f"parent {parent}\n"
     # leaving a line between the metadata('tree' object-id) and the commit message
     commitObject += "\n"
 
     commitObject += message
 
     objectId = data.hashObject(commitObject.encode(), "commit")
-    print(objectId)
+    data.setHead(objectId)
+    return objectId
 
 @data.mgit_required
 def writeTree(directory = "."):

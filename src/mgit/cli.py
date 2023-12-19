@@ -54,7 +54,7 @@ def read_tree(tree_object_id):
 @app.command()
 def commit(message):
     try:
-        base.commit(message)
+        print(base.commit(message))
     except Exception as exception:
         print(exception)
 
