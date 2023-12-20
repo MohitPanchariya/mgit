@@ -63,5 +63,9 @@ def commit(message):
 def log(object_id = None):
     base.log(object_id)
 
+@app.command()
+def checkout(commit_id):
+    base.checkout(commit_id)
+
 if __name__ == "__main__":
     app()

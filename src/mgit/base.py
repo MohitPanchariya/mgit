@@ -83,6 +83,15 @@ def log(objectId = None):
         else:
             objectId = None
 
+@data.mgit_required
+def checkout(commitId):
+    if not os.path.exists(os.path.join(".mgit", "objects", commitId)):
+        raise FileNotFoundError("No commit found with given commit id.")
+
+    commit = data.getCommit(commitId)
+    readTree(commit["tree"])
+    data.setHead(commitId)
+
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
 
