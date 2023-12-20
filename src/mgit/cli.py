@@ -29,6 +29,8 @@ def hash_object(filepath):
 @app.command()
 def cat_file(object_id, type = "blob"):
     try:
+        # Allows user to pass a reference or an object id
+        object_id = data.getOid(object_id)
         blob = data.getObject(object_id, expected = type)
         sys.stdout.flush()
         sys.stdout.buffer.write(blob)
@@ -47,6 +49,8 @@ def write_tree():
 @app.command()
 def read_tree(tree_object_id):
     try:
+        # Allows user to pass a reference or an tree object id
+        tree_object_id = data.getOid(tree_object_id)
         base.readTree(tree_object_id)
     except FileNotFoundError as exception:
         print(exception)
@@ -61,10 +65,15 @@ def commit(message):
 
 @app.command()
 def log(object_id = None):
+    if object_id:
+        # Allows user to pass a reference or an object id
+        object_id = data.getOid(object_id)
     base.log(object_id)
 
 @app.command()
 def checkout(commit_id):
+    # Allows user to pass a reference or a commit id
+    commit_id = data.getOid(commit_id)
     base.checkout(commit_id)
 
 @app.command()
@@ -76,13 +85,6 @@ def tag(name, commit_id = None):
     except Exception as execption:
         print(execption)
 
-
-@app.command()
-def get_oid(tag):
-    try:
-        print(data.getRef(os.path.join("ref", "tags", tag)))
-    except FileNotFoundError as exception:
-        print(exception)
 
 if __name__ == "__main__":
     app()
