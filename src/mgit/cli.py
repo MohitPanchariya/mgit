@@ -76,5 +76,13 @@ def tag(name, commit_id = None):
     except Exception as execption:
         print(execption)
 
+
+@app.command()
+def get_oid(tag):
+    try:
+        print(data.getRef(os.path.join("ref", "tags", tag)))
+    except FileNotFoundError as exception:
+        print(exception)
+
 if __name__ == "__main__":
     app()
