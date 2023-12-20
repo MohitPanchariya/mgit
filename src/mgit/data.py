@@ -70,10 +70,10 @@ def getObject(objectId, expected = "blob"):
 
 @mgit_required
 def updateRef(reference, objectId):
-    if not os.path.exists(os.path.join(MGIT_DIR, reference)):
-        raise FileNotFoundError("No reference found with given name.")
+    refPath = os.path.join(MGIT_DIR, reference)
+    os.makedirs(os.path.dirname(refPath), exist_ok=True)
 
-    with open(os.path.join(MGIT_DIR, reference), "w") as file:
+    with open(refPath, "w") as file:
         file.write(objectId)
 
 
@@ -81,7 +81,7 @@ def updateRef(reference, objectId):
 def getRef(reference):
     refPath = os.path.join(MGIT_DIR, reference)
     if not os.path.exists(refPath):
-        raise FileNotFoundError("No reference found with given name.")
+        raise FileNotFoundError("No reference found with given path.")
     
     with open(refPath, "r") as file:
         ref = file.read().strip()

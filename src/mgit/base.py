@@ -97,7 +97,8 @@ def checkout(commitId):
 def createTag(tag, commitId):
     if not os.path.exists(os.path.join(".mgit", "objects", commitId)):
         raise FileNotFoundError("No commit found with given commit id.")
-    ...
+    
+    data.updateRef(os.path.join("ref", "tags", tag), commitId)
 
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)

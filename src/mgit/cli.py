@@ -67,5 +67,14 @@ def log(object_id = None):
 def checkout(commit_id):
     base.checkout(commit_id)
 
+@app.command()
+def tag(name, commit_id = None):
+    try:
+        if not commit_id:
+            commit_id = data.getRef("HEAD")
+        base.createTag(name, commit_id)
+    except Exception as execption:
+        print(execption)
+
 if __name__ == "__main__":
     app()
