@@ -69,19 +69,23 @@ def getObject(objectId, expected = "blob"):
     
 
 @mgit_required
-def setHead(objectId):
-    with open(os.path.join(MGIT_DIR, "HEAD"), "w") as file:
+def updateRef(reference, objectId):
+    if not os.path.exists(os.path.join(MGIT_DIR, reference)):
+        raise FileNotFoundError("No reference found with given name.")
+
+    with open(os.path.join(MGIT_DIR, reference), "w") as file:
         file.write(objectId)
 
 
 @mgit_required
-def getHead():
-    head = None
-    headPath = os.path.join(MGIT_DIR, "HEAD")
-    if os.path.exists(headPath):
-        with open(headPath, "r") as file:
-            head = file.read().strip()
-    return head
+def getRef(reference):
+    refPath = os.path.join(MGIT_DIR, reference)
+    if not os.path.exists(refPath):
+        raise FileNotFoundError("No reference found with given name.")
+    
+    with open(refPath, "r") as file:
+        ref = file.read().strip()
+    return ref
 
 def getCommit(objectId):
     '''
