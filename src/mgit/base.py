@@ -60,6 +60,8 @@ def writeTree(directory = "."):
 
 @data.mgit_required
 def readTree(objectId):
+    if not os.path.exists(os.path.join(".mgit", "objects", objectId)):
+        raise FileNotFoundError("No object found with given object-id.")
     _emptyDirectory()
     _createTree(objectId, basePath = "")
 
