@@ -1,5 +1,6 @@
 import os
 import hashlib
+import string
 
 MGIT_DIR = "./.mgit"
 
@@ -86,6 +87,40 @@ def getRef(reference):
     with open(refPath, "r") as file:
         ref = file.read().strip()
     return ref
+
+@mgit_required
+def getOid(name):
+    '''
+    Returns the object-id associated with the tag.
+    If the tag is an object-id, the tag itself it returned.
+    '''
+    # Search for the provided tag in the following directories
+    # This way, the search for the reference will happen in
+    # .mgit directory(user specifies ref/tags/tag)
+    # .mgit/ref directory(user specifies tags/tag)
+    # .mgit/ref/teags directory(user specifies tag)
+    # .mgit/ref/heads
+    refsToTry = [
+        name,
+        os.path.join("ref", name),
+        os.path.join("ref", "tags", name),
+        os.path.join("ref", "heads", name)
+    ]
+
+    for ref in refsToTry:
+        try:
+            return getRef(ref)
+        except Exception:
+            continue
+
+    # If no ref has been found for the give name, name might be an oid
+    # Name is SHA1
+    is_hex = all (c in string.hexdigits for c in name)
+    if len (name) == 40 and is_hex:
+        return name
+    
+    # If the name isn't an oid either, raise an exception
+    raise Exception("Object-id not found for the given name.")
 
 def getCommit(objectId):
     '''
