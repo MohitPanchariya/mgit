@@ -77,7 +77,7 @@ def checkout(commit_id):
     base.checkout(commit_id)
 
 @app.command()
-def tag(name = "@", commit_id = None):
+def tag(name, commit_id = None):
     try:
         if not commit_id:
             commit_id = data.getRef("HEAD")
