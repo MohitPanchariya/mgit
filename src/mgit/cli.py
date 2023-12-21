@@ -86,5 +86,10 @@ def tag(name = "@", commit_id = None):
         print(execption)
 
 
+@app.command()
+def k():
+    for refname, ref in data.iterRefs():
+        print(refname, ref)
+
 if __name__ == "__main__":
     app()

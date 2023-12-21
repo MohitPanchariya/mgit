@@ -124,6 +124,24 @@ def getOid(name):
     # If the name isn't an oid either, raise an exception
     raise Exception("Object-id not found for the given name.")
 
+
+@mgit_required
+def iterRefs():
+    '''
+    Iterates over all the references, return a reference name and
+    the reference(object-id).
+    '''
+    refs = ["HEAD"]
+    # Walk over all refs
+    for root, _, filenames in os.walk(os.path.join(MGIT_DIR, "ref")):
+        root = os.path.relpath(root, MGIT_DIR)
+
+        for file in filenames:
+            refs.append(os.path.join(root, file))
+
+    for refname in refs:
+        yield refname, getRef(refname)
+
 def getCommit(objectId):
     '''
     This function returns a dictionary representing a commit object.
