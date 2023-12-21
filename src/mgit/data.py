@@ -94,6 +94,8 @@ def getOid(name):
     Returns the object-id associated with the tag.
     If the tag is an object-id, the tag itself it returned.
     '''
+    if name == "@":
+        name = "HEAD"
     # Search for the provided tag in the following directories
     # This way, the search for the reference will happen in
     # .mgit directory(user specifies ref/tags/tag)

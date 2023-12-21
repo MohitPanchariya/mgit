@@ -64,7 +64,7 @@ def commit(message):
 
 
 @app.command()
-def log(object_id = None):
+def log(object_id = "@"):
     if object_id:
         # Allows user to pass a reference or an object id
         object_id = data.getOid(object_id)
@@ -77,7 +77,7 @@ def checkout(commit_id):
     base.checkout(commit_id)
 
 @app.command()
-def tag(name, commit_id = None):
+def tag(name = "@", commit_id = None):
     try:
         if not commit_id:
             commit_id = data.getRef("HEAD")
