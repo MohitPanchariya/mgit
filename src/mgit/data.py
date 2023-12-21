@@ -142,6 +142,37 @@ def iterRefs():
     for refname in refs:
         yield refname, getRef(refname)
 
+
+@mgit_required
+def iterParentsAndCommits(oids):
+    '''
+    A generator which returns all the parents and commits
+    reachable from a given set of object-ids.
+    Note: Even if an object is reachable from multiple commits, 
+    its returned only once.
+    '''
+    # Get rid of any duplicate oids
+    oids = set(oids)
+    visited = set()
+
+    while oids:
+        oid = oids.pop()
+        # if not oid is needed as the previous oid may not have 
+        # a parent
+        if not oid or oid in visited:
+            continue
+
+        visited.add(oid)
+
+        commit = getCommit(oid)
+        if "parent" in commit:
+            parent = commit["parent"]
+        else:
+            parent = None
+        
+        oids.add(parent)
+        yield oid
+
 def getCommit(objectId):
     '''
     This function returns a dictionary representing a commit object.

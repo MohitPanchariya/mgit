@@ -88,8 +88,20 @@ def tag(name, commit_id = None):
 
 @app.command()
 def k():
+    oids = set()
+    # populate oids with the oids of the refs
     for refname, ref in data.iterRefs():
         print(refname, ref)
+        oids.add(data.getOid(ref))
+
+    # Print all commits that can be reached through the
+    # oids of the refs
+    for oid in data.iterParentsAndCommits(oids):
+        commit = data.getCommit(oid)
+        print(oid)
+        if "parent" in commit:
+            print(f"Parent: {commit['parent']}")
+
 
 if __name__ == "__main__":
     app()
