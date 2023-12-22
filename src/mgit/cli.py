@@ -93,7 +93,6 @@ def k():
     oids = set()
     # populate oids with the oids of the refs
     for refname, ref in data.iterRefs():
-        # print(refname, ref)
         dot += f'"{refname}" [shape=note]\n'
         dot += f'"{refname}" -> "{ref}"\n'
         oids.add(data.getOid(ref))
@@ -102,14 +101,11 @@ def k():
     # oids of the refs
     for oid in data.iterParentsAndCommits(oids):
         commit = data.getCommit(oid)
-        # print(oid)
         dot += f'"{oid}" [shape=box style=filled label="{oid[:10]}"]\n'
         if "parent" in commit:
-            # print(f"Parent: {commit['parent']}")
             dot += f'"{oid}" -> "{commit["parent"]}"\n'
     
     dot += '}'
-    print(dot)
 
     with subprocess.Popen (
         ['dot', '-Tx11', '/dev/stdin'],
