@@ -1,6 +1,7 @@
 import os
 import hashlib
 import string
+from collections import deque
 
 MGIT_DIR = "./.mgit"
 
@@ -152,11 +153,11 @@ def iterParentsAndCommits(oids):
     its returned only once.
     '''
     # Get rid of any duplicate oids
-    oids = set(oids)
+    oids = deque(oids)
     visited = set()
 
     while oids:
-        oid = oids.pop()
+        oid = oids.popleft()
         # if not oid is needed as the previous oid may not have 
         # a parent
         if not oid or oid in visited:
@@ -170,7 +171,7 @@ def iterParentsAndCommits(oids):
         else:
             parent = None
         
-        oids.add(parent)
+        oids.appendleft(parent)
         yield oid
 
 def getCommit(objectId):
