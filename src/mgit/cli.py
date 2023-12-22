@@ -3,6 +3,7 @@ import os
 import sys
 import data
 import base
+import subprocess
 
 app = typer.Typer()
 
@@ -88,20 +89,32 @@ def tag(name, commit_id = None):
 
 @app.command()
 def k():
+    dot = 'digraph commits {\n'
     oids = set()
     # populate oids with the oids of the refs
     for refname, ref in data.iterRefs():
-        print(refname, ref)
+        # print(refname, ref)
+        dot += f'"{refname}" [shape=note]\n'
+        dot += f'"{refname}" -> "{ref}"\n'
         oids.add(data.getOid(ref))
 
     # Print all commits that can be reached through the
     # oids of the refs
     for oid in data.iterParentsAndCommits(oids):
         commit = data.getCommit(oid)
-        print(oid)
+        # print(oid)
+        dot += f'"{oid}" [shape=box style=filled label="{oid[:10]}"]\n'
         if "parent" in commit:
-            print(f"Parent: {commit['parent']}")
+            # print(f"Parent: {commit['parent']}")
+            dot += f'"{oid}" -> "{commit["parent"]}"\n'
+    
+    dot += '}'
+    print(dot)
 
+    with subprocess.Popen (
+        ['dot', '-Tx11', '/dev/stdin'],
+        stdin=subprocess.PIPE) as proc:
+        proc.communicate (dot.encode ())
 
 if __name__ == "__main__":
     app()
