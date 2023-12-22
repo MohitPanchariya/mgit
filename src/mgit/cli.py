@@ -4,6 +4,7 @@ import sys
 import data
 import base
 import subprocess
+import textwrap
 
 app = typer.Typer()
 
@@ -66,10 +67,13 @@ def commit(message):
 
 @app.command()
 def log(object_id = "@"):
-    if object_id:
-        # Allows user to pass a reference or an object id
-        object_id = data.getOid(object_id)
-    base.log(object_id)
+    object_id = data.getOid(object_id)
+    for oid in data.iterParentsAndCommits({object_id}):
+        commit = data.getCommit(oid)
+        print(f"commit {oid}")
+        lines = textwrap.wrap(commit["message"])
+        for line in lines:
+            print(textwrap.indent(line, "   "))
 
 @app.command()
 def checkout(commit_id):
