@@ -120,6 +120,7 @@ def k():
 
 @app.command()
 def branch(name, start_point = "@"):
+    start_point = data.getOid(start_point)
     data.createBranch(name, start_point)
     print(f"Branch {name} created at {start_point}")
 
