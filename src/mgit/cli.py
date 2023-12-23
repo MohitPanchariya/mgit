@@ -16,6 +16,16 @@ def init():
     except FileExistsError as exception:
         print(exception)
 
+
+@app.command()
+def status():
+    branch = base.getBranchName()
+
+    if not branch:
+        print(f"HEAD in detached mode at {data.getOid('HEAD')}")   
+    else:
+        print(f"On branch {branch}") 
+
 @app.command()
 def status():
     branch = base.getBranchName()

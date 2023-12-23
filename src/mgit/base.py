@@ -14,6 +14,18 @@ def init():
     )))
 
 @data.mgit_required
+def getBranchName():
+    try:
+        HEAD = data.getRef("HEAD", deref=False)
+    except FileNotFoundError:
+        pass
+    
+    if not HEAD.symbolic:
+        return None
+
+    return os.path.relpath(HEAD.value, os.path.join("ref", "heads"))
+
+@data.mgit_required
 def commit(message):
     # tree object-id
     commitObject = f"tree {writeTree()}\n"
