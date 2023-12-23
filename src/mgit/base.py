@@ -126,7 +126,7 @@ def isBranch(name):
     returns false.
     '''
     try:
-        _ = data.getRef(name)
+        _ = data.getRef(os.path.join("ref", "heads", name))
         return True
     except FileNotFoundError:
         return False
