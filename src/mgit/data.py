@@ -75,7 +75,7 @@ def getObject(objectId, expected = "blob"):
     
 
 @mgit_required
-def updateRef(reference, refValue):
+def updateRef(reference, refValue, deref = True):
     '''
     Update a reference to point to the given RefValue(refValue).
     If reference doesn't exist, a reference is created.
@@ -85,21 +85,45 @@ def updateRef(reference, refValue):
     passed in as an argument must be, "ref/tags/example".
     The reference is created in, ".mgit/ref/tags/example".
     '''
-    assert not refValue.symbolic
     refPath = os.path.join(MGIT_DIR, reference)
     os.makedirs(os.path.dirname(refPath), exist_ok=True)
+    # create the reference file
+    open(refPath, "w")
+    
+    reference = _getRefInternal(reference, deref)[0]
+    assert refValue.value
+    if refValue.symbolic:
+        refValue = f"ref: {refValue.value}"
+    else:
+        refValue = refValue.value
+        
 
     with open(refPath, "w") as file:
-        file.write(refValue.value)
+        file.write(refValue)
 
 
 @mgit_required
-def getRef(reference):
+def getRef(reference, deref = True):
     '''
-    Returns a RefValue named tuple. 
+    Returns the object-id pointed to by the given reference.
     If a reference points to another reference(a symbolic ref), 
     the references are recursively tracked down and the object id 
-    the last reference points to is the value of RefValue.
+    the last reference points to is returned.
+    Note: The reference must be a relative path from the
+    .mgit directory. 
+    E.g: To create a tag named "example", the reference
+    passed in as an argument must be, "ref/tags/example".
+    The reference is created in, ".mgit/ref/tags/example".
+    '''
+    return _getRefInternal(reference, deref)[1]
+
+@mgit_required
+def _getRefInternal(reference, deref):
+    '''
+    Returns a reference name and a RefValue named tuple. 
+    If a reference points to another reference(a symbolic ref), 
+    the references are recursively tracked down and the reference
+    of the last oid, and a RefValue are returned.
     Note: The reference must be a relative path from the
     .mgit directory. 
     E.g: To create a tag named "example", the reference
@@ -107,16 +131,20 @@ def getRef(reference):
     The reference is created in, ".mgit/ref/tags/example".
     '''
     refPath = os.path.join(MGIT_DIR, reference)
+    ref = None
     if not os.path.exists(refPath):
         raise FileNotFoundError("No reference found with given path.")
     
     with open(refPath, "r") as file:
         ref = file.read().strip()
 
-    if ref and ref.startswith("ref:"):
-        return getRef(ref.split(':', 1)[1].strip())
+    symbolic = bool (ref) and ref.startswith("ref:")
+    if symbolic:
+        ref = ref.split(":", 1)[1].strip()
+        if deref:
+            return _getRefInternal(ref, deref)
     
-    return RefValue(symbolic=False, value=ref)
+    return ref, RefValue(symbolic=symbolic, value=ref)
 
 @mgit_required
 def getOid(name):
@@ -141,7 +169,7 @@ def getOid(name):
 
     for ref in refsToTry:
         try:
-            return getRef(ref).value
+            return getRef(ref, deref=False).value
         except Exception:
             continue
 
@@ -156,7 +184,7 @@ def getOid(name):
 
 
 @mgit_required
-def iterRefs():
+def iterRefs(deref = True):
     '''
     Iterates over all the references, return a reference name and
     the reference(object-id).
@@ -170,7 +198,7 @@ def iterRefs():
             refs.append(os.path.join(root, file))
 
     for refname in refs:
-        yield refname, RefValue(symbolic=False, value=getRef(refname).value)
+        yield refname, getRef(refname, deref)
 
 
 @mgit_required
