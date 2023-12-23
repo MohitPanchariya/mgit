@@ -72,6 +72,15 @@ def getObject(objectId, expected = "blob"):
 
 @mgit_required
 def updateRef(reference, objectId):
+    '''
+    Update a reference to point to the given objectId.
+    If reference doesn't exist, a reference is created.
+    Note: The reference must be a relative path from the
+    .mgit directory. 
+    E.g: To create a tag named "example", the reference
+    passed in as an argument must be, "ref/tags/example".
+    The reference is created in, ".mgit/ref/tags/example".
+    '''
     refPath = os.path.join(MGIT_DIR, reference)
     os.makedirs(os.path.dirname(refPath), exist_ok=True)
 
