@@ -90,12 +90,26 @@ def updateRef(reference, objectId):
 
 @mgit_required
 def getRef(reference):
+    '''
+    Returns the oid a reference points to. 
+    If a reference points to another reference(a symbolic ref), 
+    the references are recursively tracked down and the object id 
+    the last reference points to is returned.
+    Note: The reference must be a relative path from the
+    .mgit directory. 
+    E.g: To create a tag named "example", the reference
+    passed in as an argument must be, "ref/tags/example".
+    The reference is created in, ".mgit/ref/tags/example".
+    '''
     refPath = os.path.join(MGIT_DIR, reference)
     if not os.path.exists(refPath):
         raise FileNotFoundError("No reference found with given path.")
     
     with open(refPath, "r") as file:
         ref = file.read().strip()
+
+    if ref and ref.startswith("ref:"):
+        return getRef(ref.split (':', 1)[1].strip ())
     return ref
 
 @mgit_required
