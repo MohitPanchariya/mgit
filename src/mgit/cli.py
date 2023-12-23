@@ -85,7 +85,7 @@ def checkout(commit_id):
 def tag(name, commit_id = None):
     try:
         if not commit_id:
-            commit_id = data.getRef("HEAD")
+            commit_id = data.getRef("HEAD").value
         base.createTag(name, commit_id)
     except Exception as execption:
         print(execption)
@@ -98,9 +98,10 @@ def k():
     # populate oids with the oids of the refs
     for refname, ref in data.iterRefs():
         dot += f'"{refname}" [shape=note]\n'
-        dot += f'"{refname}" -> "{ref}"\n'
-        oids.add(data.getOid(ref))
+        dot += f'"{refname}" -> "{ref.value}"\n'
+        oids.add(ref.value)
 
+    print(oids)
     # Print all commits that can be reached through the
     # oids of the refs
     for oid in data.iterParentsAndCommits(oids):

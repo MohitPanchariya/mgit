@@ -7,7 +7,7 @@ def commit(message):
     # tree object-id
     commitObject = f"tree {writeTree()}\n"
     # parent commit hash
-    parent = data.getRef("HEAD")
+    parent = data.getRef("HEAD").value
     if parent:
         commitObject += f"parent {parent}\n"
     # leaving a line between the metadata('tree' object-id) and the commit message
@@ -16,7 +16,7 @@ def commit(message):
     commitObject += message
 
     objectId = data.hashObject(commitObject.encode(), "commit")
-    data.updateRef("HEAD", objectId)
+    data.updateRef("HEAD", data.RefValue(symbolic=False, value=objectId))
     return objectId
 
 @data.mgit_required
@@ -90,7 +90,7 @@ def checkout(commitId):
 
     commit = data.getCommit(commitId)
     readTree(commit["tree"])
-    data.updateRef("HEAD", commitId)
+    data.updateRef("HEAD", data.RefValue(symbolic=False, value=commitId))
 
 
 @data.mgit_required
@@ -98,7 +98,7 @@ def createTag(tag, commitId):
     if not os.path.exists(os.path.join(".mgit", "objects", commitId)):
         raise FileNotFoundError("No commit found with given commit id.")
     
-    data.updateRef(os.path.join("ref", "tags", tag), commitId)
+    data.updateRef(os.path.join("ref", "tags", tag), data.RefValue(symbolic=False, value=commitId))
 
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)

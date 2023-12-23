@@ -1,9 +1,12 @@
 import os
 import hashlib
 import string
-from collections import deque
+from collections import deque, namedtuple
 
 MGIT_DIR = "./.mgit"
+
+RefValue = namedtuple("RefValue", ["symbolic", "value"])
+
 
 def mgit_required(func):
     '''
@@ -56,6 +59,7 @@ def getObject(objectId, expected = "blob"):
     This function takes in an object id(sha1 hash) and returns the
     content of the object.
     '''
+    objectId = getOid(objectId)
     if not os.path.exists(os.path.join(MGIT_DIR, "objects", objectId)):
         raise FileNotFoundError("No object found with given object id.")
     else:
@@ -71,9 +75,9 @@ def getObject(objectId, expected = "blob"):
     
 
 @mgit_required
-def updateRef(reference, objectId):
+def updateRef(reference, refValue):
     '''
-    Update a reference to point to the given objectId.
+    Update a reference to point to the given RefValue(refValue).
     If reference doesn't exist, a reference is created.
     Note: The reference must be a relative path from the
     .mgit directory. 
@@ -81,20 +85,21 @@ def updateRef(reference, objectId):
     passed in as an argument must be, "ref/tags/example".
     The reference is created in, ".mgit/ref/tags/example".
     '''
+    assert not refValue.symbolic
     refPath = os.path.join(MGIT_DIR, reference)
     os.makedirs(os.path.dirname(refPath), exist_ok=True)
 
     with open(refPath, "w") as file:
-        file.write(objectId)
+        file.write(refValue.value)
 
 
 @mgit_required
 def getRef(reference):
     '''
-    Returns the oid a reference points to. 
+    Returns a RefValue named tuple. 
     If a reference points to another reference(a symbolic ref), 
     the references are recursively tracked down and the object id 
-    the last reference points to is returned.
+    the last reference points to is the value of RefValue.
     Note: The reference must be a relative path from the
     .mgit directory. 
     E.g: To create a tag named "example", the reference
@@ -109,8 +114,9 @@ def getRef(reference):
         ref = file.read().strip()
 
     if ref and ref.startswith("ref:"):
-        return getRef(ref.split (':', 1)[1].strip ())
-    return ref
+        return getRef(ref.split(':', 1)[1].strip())
+    
+    return RefValue(symbolic=False, value=ref)
 
 @mgit_required
 def getOid(name):
@@ -135,7 +141,7 @@ def getOid(name):
 
     for ref in refsToTry:
         try:
-            return getRef(ref)
+            return getRef(ref).value
         except Exception:
             continue
 
@@ -164,7 +170,7 @@ def iterRefs():
             refs.append(os.path.join(root, file))
 
     for refname in refs:
-        yield refname, getRef(refname)
+        yield refname, RefValue(symbolic=False, value=getRef(refname).value)
 
 
 @mgit_required
@@ -234,7 +240,7 @@ def createBranch(branchName, startPoint):
     Create a branch with the give branchName and startPoint
     (object-id)
     '''
-    updateRef(os.path.join("ref", "heads", branchName), startPoint)
+    updateRef(os.path.join("ref", "heads", branchName), RefValue(symbolic=False, value=startPoint))
 
 def parseTreeObject(treeObj):
     #Get the data of the tree object
