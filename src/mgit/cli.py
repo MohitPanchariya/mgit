@@ -11,7 +11,7 @@ app = typer.Typer()
 @app.command()
 def init():
     try:
-        data.init()
+        base.init()
         print(f"Initialised repository in {os.path.join(os.getcwd())}")
     except FileExistsError as exception:
         print(exception)

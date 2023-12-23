@@ -2,6 +2,17 @@ import data
 import os
 import textwrap
 
+
+def init():
+    '''
+    This function is used to initialise a mgit repository.
+    If the cwd is already a repository, an exception is raise.
+    '''
+    data.init()
+    data.updateRef("HEAD", data.RefValue(symbolic=True, value=os.path.join(
+        "ref", "heads", "master" 
+    )))
+
 @data.mgit_required
 def commit(message):
     # tree object-id
