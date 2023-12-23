@@ -116,5 +116,11 @@ def k():
         stdin=subprocess.PIPE) as proc:
         proc.communicate (dot.encode ())
 
+
+@app.command()
+def branch(name, start_point = "@"):
+    data.createBranch(name, start_point)
+    print(f"Branch {name} created at {start_point}")
+
 if __name__ == "__main__":
     app()

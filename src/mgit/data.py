@@ -213,6 +213,15 @@ def getCommit(objectId):
 
     return commit
 
+
+@mgit_required
+def createBranch(branchName, startPoint):
+    '''
+    Create a branch with the give branchName and startPoint
+    (object-id)
+    '''
+    updateRef(os.path.join("ref", "heads", branchName), startPoint)
+
 def parseTreeObject(treeObj):
     #Get the data of the tree object
     type_, _, data = treeObj.partition(b"\x00")
