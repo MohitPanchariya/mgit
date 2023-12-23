@@ -84,13 +84,21 @@ def log(objectId = None):
             objectId = None
 
 @data.mgit_required
-def checkout(commitId):
-    if not os.path.exists(os.path.join(".mgit", "objects", commitId)):
-        raise FileNotFoundError("No commit found with given commit id.")
+def checkout(name):
+    '''
+    Checkout a branch.
+    '''
+    commitId = data.getOid(name)
+    if isBranch(name):
+        pointTo = os.path.join("ref", "heads", name)
+        HEAD = data.RefValue(symbolic=True, value=pointTo)
+    else:
+        HEAD = data.RefValue(symbolic=False, value=commitId)
+        print(f"HEAD is in a detached state at {commitId}")
 
     commit = data.getCommit(commitId)
     readTree(commit["tree"])
-    data.updateRef("HEAD", data.RefValue(symbolic=False, value=commitId))
+    data.updateRef("HEAD", HEAD , deref=False)
 
 
 @data.mgit_required
@@ -99,6 +107,18 @@ def createTag(tag, commitId):
         raise FileNotFoundError("No commit found with given commit id.")
     
     data.updateRef(os.path.join("ref", "tags", tag), data.RefValue(symbolic=False, value=commitId))
+
+@data.mgit_required
+def isBranch(name):
+    '''
+    Returns True if provided name is a branch. Else
+    returns false.
+    '''
+    try:
+        _ = data.getRef(name)
+        return True
+    except FileNotFoundError:
+        return False
 
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
