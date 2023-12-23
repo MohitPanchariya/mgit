@@ -15,7 +15,14 @@ def init():
         print(f"Initialised repository in {os.path.join(os.getcwd())}")
     except FileExistsError as exception:
         print(exception)
-        
+
+@app.command()
+def status():
+    branch = base.getBranchName()
+    if not branch:
+        print(f"HEAD in datached mode at {data.getOid('@')}")
+    else:
+        print(f"On branch {branch}")
 
 @app.command()
 def hash_object(filepath):
@@ -76,10 +83,9 @@ def log(object_id = "@"):
             print(textwrap.indent(line, "   "))
 
 @app.command()
-def checkout(commit_id):
+def checkout(name):
     # Allows user to pass a reference or a commit id
-    commit_id = data.getOid(commit_id)
-    base.checkout(commit_id)
+    base.checkout(name)
 
 @app.command()
 def tag(name, commit_id = None):
