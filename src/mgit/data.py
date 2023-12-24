@@ -184,7 +184,7 @@ def getOid(name):
 
 
 @mgit_required
-def iterRefs(deref = True):
+def iterRefs(prefix = "", deref = True):
     '''
     Iterates over all the references, return a reference name and
     the reference(object-id).
@@ -198,6 +198,8 @@ def iterRefs(deref = True):
             refs.append(os.path.join(root, file))
 
     for refname in refs:
+        if not refname.startswith(prefix):
+            continue
         yield refname, getRef(refname, deref)
 
 
@@ -209,7 +211,6 @@ def iterParentsAndCommits(oids):
     Note: Even if an object is reachable from multiple commits, 
     its returned only once.
     '''
-    # Get rid of any duplicate oids
     oids = deque(oids)
     visited = set()
 
