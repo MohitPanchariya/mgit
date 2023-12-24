@@ -131,20 +131,20 @@ def _getRefInternal(reference, deref):
     The reference is created in, ".mgit/ref/tags/example".
     '''
     refPath = os.path.join(MGIT_DIR, reference)
-    ref = None
+    value = None
     if not os.path.exists(refPath):
         raise FileNotFoundError("No reference found with given path.")
     
     with open(refPath, "r") as file:
-        ref = file.read().strip()
+        value = file.read().strip()
 
-    symbolic = bool (ref) and ref.startswith("ref:")
+    symbolic = bool (value) and value.startswith("ref:")
     if symbolic:
-        ref = ref.split(":", 1)[1].strip()
+        value = value.split(":", 1)[1].strip()
         if deref:
-            return _getRefInternal(ref, deref)
+            return _getRefInternal(value, deref)
     
-    return ref, RefValue(symbolic=symbolic, value=ref)
+    return reference, RefValue(symbolic=symbolic, value=value)
 
 @mgit_required
 def getOid(name):
