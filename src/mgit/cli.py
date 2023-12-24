@@ -84,10 +84,18 @@ def commit(message):
 
 @app.command()
 def log(object_id = "@"):
+    # Fetch all tags and create a reverse look up(commitId->tag)
+    lookUp = {}
+    for tag, commitId in data.iterRefs(prefix=os.path.join("ref", "tags")):
+        lookUp[commitId.value] = os.path.relpath(tag, os.path.join("ref", "tags"))
+
     object_id = data.getOid(object_id)
     for oid in data.iterParentsAndCommits({object_id}):
         commit = data.getCommit(oid)
-        print(f"commit {oid}")
+        printStr = f"commit {oid}"
+        if oid in lookUp:
+            printStr += f", (tag: {lookUp[oid]})"
+        print(printStr)
         lines = textwrap.wrap(commit["message"])
         for line in lines:
             print(textwrap.indent(line, "   "))
