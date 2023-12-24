@@ -137,8 +137,10 @@ def k():
 @app.command()
 def branch(name = "", start_point = "HEAD", list:bool = False):
     if list:
+        currentBranch = base.getBranchName()
         for branch in base.getBranches():
-            print(branch)
+            prefix = "*" if branch == currentBranch else " "
+            print(f"{prefix} {branch}")
     else:
         if name == "":
             print("A name must be provided.")
