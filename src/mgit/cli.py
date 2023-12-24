@@ -135,7 +135,7 @@ def k():
 
 
 @app.command()
-def branch(name, start_point = "@"):
+def branch(name, start_point = "HEAD"):
     start_point = data.getOid(start_point)
     data.createBranch(name, start_point)
     print(f"Branch {name} created at {start_point}")
