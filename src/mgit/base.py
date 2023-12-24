@@ -27,10 +27,26 @@ def getBranchName():
 
 @data.mgit_required
 def commit(message):
+    # check if HEAD is in detached state
+    HEAD = data.getRef("HEAD", deref=False)
+    detached = False
+    if not HEAD.symbolic:
+        print("HEAD is in a detached state.\n"\
+            "Create a branch before switching to another branch "\
+            "or checking out another commit to avoid losing "\
+            "commits")
+        detached = True
+    
     # tree object-id
     commitObject = f"tree {writeTree()}\n"
+    
+    if detached:
+        parent = data.getRef("HEAD", deref=False).value
+    # Get the object-id pointed to by the branch
+    else:
+        parent = data.getRef(HEAD.value).value
+
     # parent commit hash
-    parent = data.getRef("HEAD").value
     if parent:
         commitObject += f"parent {parent}\n"
     # leaving a line between the metadata('tree' object-id) and the commit message
@@ -39,7 +55,13 @@ def commit(message):
     commitObject += message
 
     objectId = data.hashObject(commitObject.encode(), "commit")
-    data.updateRef("HEAD", data.RefValue(symbolic=False, value=objectId))
+    refValue = data.RefValue(symbolic=False, value=objectId)
+    # If HEAD is detached, just update HEAD
+    if detached:
+        data.updateRef("HEAD", refValue)
+    # If HEAD points to a branch, update the branch
+    else:
+        data.updateRef(HEAD.value, refValue, deref=False)
     return objectId
 
 @data.mgit_required
