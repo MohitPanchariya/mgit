@@ -135,10 +135,17 @@ def k():
 
 
 @app.command()
-def branch(name, start_point = "HEAD"):
-    start_point = data.getOid(start_point)
-    data.createBranch(name, start_point)
-    print(f"Branch {name} created at {start_point}")
+def branch(name = "", start_point = "HEAD", list:bool = False):
+    if list:
+        for branch in base.getBranches():
+            print(branch)
+    else:
+        if name == "":
+            print("A name must be provided.")
+            sys.exit(1)
+        start_point = data.getOid(start_point)
+        data.createBranch(name, start_point)
+        print(f"Branch {name} created at {start_point}")
 
 if __name__ == "__main__":
     app()

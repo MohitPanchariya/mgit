@@ -143,6 +143,12 @@ def isBranch(name):
     except FileNotFoundError:
         return False
 
+
+@data.mgit_required
+def getBranches():
+    for ref, _ in data.iterRefs(prefix=os.path.join("ref", "heads")):
+        yield os.path.relpath(ref, os.path.join("ref", "heads"))
+
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
 
