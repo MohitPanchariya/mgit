@@ -153,6 +153,32 @@ def createTag(tag, commitId):
     
     data.updateRef(os.path.join("ref", "tags", tag), data.RefValue(symbolic=False, value=commitId))
 
+
+@data.mgit_required
+def reset(commitId, hard = False):
+    if not os.path.join(".mgit", "objects", commitId):
+        raise FileNotFoundError("Commit with given commit id not found.")
+
+    # Check if HEAD points to a branch
+    currBranch = getBranchName()
+    if not currBranch:
+        raise Exception("HEAD doesn't point to a branch.\n"\
+                        "A branch must be checked out before resetting.")
+    
+    # Make branch point to the give commit
+    data.updateRef(
+        os.path.join("ref", "heads", currBranch),
+        data.RefValue(symbolic=False, value=commitId),
+        deref=False
+    )
+
+    # If hard reset, revert the working directory back to the state
+    # of the given commit
+    if hard:
+        commit = data.getCommit(commitId)
+        tree = commit["tree"]
+        readTree(tree)
+
 @data.mgit_required
 def isBranch(name):
     '''

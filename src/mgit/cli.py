@@ -157,5 +157,13 @@ def branch(name = "", start_point = "HEAD", list:bool = False):
         data.createBranch(name, start_point)
         print(f"Branch {name} created at {start_point}")
 
+
+@app.command()
+def reset(commit_id, hard: bool = False):
+    try:
+        base.reset(commit_id, hard)
+    except Exception as exception:
+        print(exception)
+
 if __name__ == "__main__":
     app()
