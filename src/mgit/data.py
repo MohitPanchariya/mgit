@@ -87,10 +87,16 @@ def updateRef(reference, refValue, deref = True):
     '''
     refPath = os.path.join(MGIT_DIR, reference)
     os.makedirs(os.path.dirname(refPath), exist_ok=True)
+
     # create the reference file
-    open(refPath, "w")
-    
+    if not os.path.exists(refPath):
+        open(refPath, "w")
+        
     reference = _getRefInternal(reference, deref)[0]
+    # If deref is set to true, refPath needs to be updated
+    # to the reference being pointed to
+    if deref:
+        refPath = os.path.join(MGIT_DIR, reference)
     assert refValue.value
     if refValue.symbolic:
         refValue = f"ref: {refValue.value}"
