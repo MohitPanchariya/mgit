@@ -82,6 +82,16 @@ def commit(message):
         print(exception)
 
 
+def _printCommit(oid, ref = None):
+    commit = data.getCommit(oid)
+    printStr = f"commit {oid}"
+    if ref:
+        printStr += f", (tag: {ref})"
+    print(printStr)
+    lines = textwrap.wrap(commit["message"])
+    for line in lines:
+        print(textwrap.indent(line, "   "))
+
 @app.command()
 def log(object_id = "@"):
     # Fetch all tags and create a reverse look up(commitId->tag)
@@ -91,14 +101,15 @@ def log(object_id = "@"):
 
     object_id = data.getOid(object_id)
     for oid in data.iterParentsAndCommits({object_id}):
-        commit = data.getCommit(oid)
-        printStr = f"commit {oid}"
         if oid in lookUp:
-            printStr += f", (tag: {lookUp[oid]})"
-        print(printStr)
-        lines = textwrap.wrap(commit["message"])
-        for line in lines:
-            print(textwrap.indent(line, "   "))
+            _printCommit(oid, lookUp[oid])
+        else:
+            _printCommit(oid)
+
+
+@app.command()
+def show(commit_id):
+    _printCommit(commit_id)
 
 @app.command()
 def checkout(name):
