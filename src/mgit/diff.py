@@ -1,5 +1,24 @@
 from collections import defaultdict
 import base
+import data
+import difflib
+
+def diffBlobs(blobId1, blobId2):
+    '''
+    Returns the unified difference between two blobs
+    '''
+    blob1 = []
+    blob2 = []
+    if blobId1:
+        blob1 = data.getObject(blobId1).decode().splitlines()
+    if blobId2:
+        blob2 = data.getObject(blobId2).decode().splitlines()
+    
+    diff = []
+    for line in difflib.unified_diff(blob1, blob2):
+        diff.append(line)
+    
+    return diff
 
 def groupTrees(*trees):
     '''
@@ -23,13 +42,16 @@ def groupTrees(*trees):
         yield (path, *oids)
 
         
-def diffTrees(fromTree, toTree):
+def diffTrees(fromTree, toTree, unifiedDiff = False):
     '''
     returns a string which lists the files that have 
     changed across the given trees.
     '''
-    diff = ""
+    diff = {}
     for path, fromOid, toOid in groupTrees(fromTree, toTree):
         if fromOid != toOid:
-            diff += f'changed: {path}\n'
+            diff[path] = None
+            if unifiedDiff:
+                diff[path] = diffBlobs(fromOid, toOid)
+    
     return diff

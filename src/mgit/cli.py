@@ -113,7 +113,7 @@ def log(object_id = "@"):
 
 
 @app.command()
-def show(commit_id):
+def show(commit_id, unified_diff: bool = False):
     _printCommit(commit_id)
     commit = data.getCommit(commit_id)
     
@@ -121,8 +121,12 @@ def show(commit_id):
     parentCommit = data.getCommit(commit["parent"])
     parentTreeId = parentCommit["tree"]
 
-    output = diff.diffTrees(treeId, parentTreeId)
-    print(output)
+    output = diff.diffTrees(parentTreeId, treeId, unified_diff)
+    for change in output:
+        print(f"File changed: {change}")
+        if unified_diff:
+            for line in output[change]:
+                print(line)
 
 @app.command()
 def checkout(name):
