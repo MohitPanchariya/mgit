@@ -5,7 +5,7 @@ import data
 import base
 import subprocess
 import textwrap
-import diff
+import diff as myDiff
 
 app = typer.Typer()
 
@@ -117,11 +117,11 @@ def show(commit_id, unified_diff: bool = False):
     _printCommit(commit_id)
     commit = data.getCommit(commit_id)
     
-    treeId = commit["tree"]
+    tree = base.getTree(commit["tree"])
     parentCommit = data.getCommit(commit["parent"])
-    parentTreeId = parentCommit["tree"]
+    parentTree = base.getTree(parentCommit["tree"])
 
-    output = diff.diffTrees(parentTreeId, treeId, unified_diff)
+    output = myDiff.diffTrees(parentTree, tree, unified_diff)
     for change in output:
         print(f"File changed: {change}")
         if unified_diff:

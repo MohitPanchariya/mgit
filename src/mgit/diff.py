@@ -32,9 +32,7 @@ def groupTrees(*trees):
     '''
     entries = defaultdict(lambda: [None] * len(trees))
 
-    for i, treeId in enumerate(trees):
-        tree = base.getTree(treeId)
-    
+    for i, tree in enumerate(trees):
         for path, oid in tree.items():
             entries[path][i] = oid
 
