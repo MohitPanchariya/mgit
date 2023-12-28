@@ -99,7 +99,11 @@ def log(object_id = "@"):
     for tag, commitId in data.iterRefs(prefix=os.path.join("ref", "tags")):
         lookUp[commitId.value] = os.path.relpath(tag, os.path.join("ref", "tags"))
 
-    object_id = data.getOid(object_id)
+    if object_id == "@":
+        object_id = data.getRef("HEAD", deref=True).value
+    else:
+        object_id = data.getOid(object_id)
+
     for oid in data.iterParentsAndCommits({object_id}):
         if oid in lookUp:
             _printCommit(oid, lookUp[oid])
