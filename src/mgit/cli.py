@@ -82,6 +82,20 @@ def commit(message):
     except Exception as exception:
         print(exception)
 
+@app.command()
+def diff(commit_id = "HEAD"):
+    workingTree = base.getWorkingTree()
+
+    objectId = data.getOid(commit_id)
+    commit = data.getCommit(objectId)
+    tree = base.getTree(commit["tree"])
+    
+    output = myDiff.diffTrees(tree, workingTree, True)
+    for change in output:
+        print(f"File changed: {change}")
+        for line in output[change]:
+            print(line)
+
 
 def _printCommit(oid, ref = None):
     commit = data.getCommit(oid)

@@ -229,6 +229,20 @@ def getBranches():
     for ref, _ in data.iterRefs(prefix=os.path.join("ref", "heads")):
         yield os.path.relpath(ref, os.path.join("ref", "heads"))
 
+
+@data.mgit_required
+def getWorkingTree():
+    result = {}
+    for root, _, files in os.walk("."):
+        for file in files:
+            path = os.path.relpath(os.path.join(root, file))
+            if isIgnored(path) or not os.path.isfile(path):
+                continue
+            with open(path, "rb") as fileContent:
+                result[path] = data.hashObject(fileContent.read())
+
+    return result
+
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
 
