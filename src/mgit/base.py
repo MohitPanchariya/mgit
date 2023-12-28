@@ -110,6 +110,38 @@ def readTree(objectId):
     _emptyDirectory()
     _createTree(objectId, basePath = "")
 
+
+def _iterTreeEntries(oid):
+    '''
+    Yields the metadata(type of object, object-id, name)
+    of a tree object.
+    '''
+    if not oid:
+        return
+    tree = data.getObject(oid, 'tree')
+    for entry in tree.decode ().splitlines ():
+        type_, oid, name = entry.split (' ', 2)
+        yield type_, oid, name
+
+
+def getTree(oid, base_path=''):
+    '''
+    Returns a dictionary which has file paths and
+    object ids of the files.
+    '''
+    result = {}
+    for type_, oid, name in _iterTreeEntries (oid):
+        assert '/' not in name
+        assert name not in ('..', '.')
+        path = base_path + name
+        if type_ == 'blob':
+            result[path] = oid
+        elif type_ == 'tree':
+            result.update (getTree(oid, f'{path}/'))
+        else:
+            assert False, f'Unknown tree entry {type_}'
+    return result
+
 @data.mgit_required
 def log(objectId = None):
     if not objectId:
