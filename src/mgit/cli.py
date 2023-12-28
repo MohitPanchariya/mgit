@@ -96,6 +96,19 @@ def diff(commit_id = "HEAD"):
         for line in output[change]:
             print(line)
 
+@app.command()
+def status():
+    workingTree = base.getWorkingTree()
+
+    objectId = data.getOid("HEAD")
+    print(objectId)
+    commit = data.getCommit(objectId)
+    print(commit)
+    tree = base.getTree(commit["tree"])
+
+    for path, action in myDiff.iterChangedFiles(tree, workingTree):
+        print(f"File action: {path} ({action})")
+
 
 def _printCommit(oid, ref = None):
     commit = data.getCommit(oid)

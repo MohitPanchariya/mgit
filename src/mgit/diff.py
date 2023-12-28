@@ -1,5 +1,4 @@
 from collections import defaultdict
-import base
 import data
 import difflib
 
@@ -53,3 +52,20 @@ def diffTrees(fromTree, toTree, unifiedDiff = False):
                 diff[path] = diffBlobs(fromOid, toOid)
     
     return diff
+
+
+def iterChangedFiles(fromTree, toTree):
+    '''
+    Yields an action(modified, new file, deleted, unchanged) for 
+    each file in the given trees.
+    '''
+    for path, fromOid, toOid in groupTrees(fromTree, toTree):
+        if not fromOid:
+            action = "New File"
+        elif not toOid:
+            action = "Deleted"
+        elif fromOid != toOid:
+            action = "Modified"
+        else:
+            action = "Unchanged"
+        yield path, action
