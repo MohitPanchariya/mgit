@@ -5,6 +5,7 @@ import data
 import base
 import subprocess
 import textwrap
+import diff
 
 app = typer.Typer()
 
@@ -114,6 +115,14 @@ def log(object_id = "@"):
 @app.command()
 def show(commit_id):
     _printCommit(commit_id)
+    commit = data.getCommit(commit_id)
+    
+    treeId = commit["tree"]
+    parentCommit = data.getCommit(commit["parent"])
+    parentTreeId = parentCommit["tree"]
+
+    output = diff.diffTrees(treeId, parentTreeId)
+    print(output)
 
 @app.command()
 def checkout(name):
