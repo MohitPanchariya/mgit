@@ -149,8 +149,10 @@ def show(commit_id, unified_diff: bool = False):
     commit = data.getCommit(commit_id)
     
     tree = base.getTree(commit["tree"])
-    parentCommit = data.getCommit(commit["parent"])
-    parentTree = base.getTree(parentCommit["tree"])
+    parentTree = None
+    if "parent" in commit:
+        parentCommit = data.getCommit(commit["parents"][0])
+        parentTree = base.getTree(parentCommit["tree"])
 
     output = myDiff.diffTrees(parentTree, tree, unified_diff)
     for change in output:

@@ -230,12 +230,15 @@ def iterParentsAndCommits(oids):
         visited.add(oid)
 
         commit = getCommit(oid)
-        if "parent" in commit:
-            parent = commit["parent"]
+        if "parents" in commit:
+            parents = commit["parents"]
         else:
-            parent = None
+            parents = []
         
-        oids.appendleft(parent)
+        # Add first parent next
+        oids.extendleft(parents[:1])
+        # Add other parents later
+        oids.extend(parents[1:])
         yield oid
 
 def getCommit(objectId):
@@ -250,6 +253,7 @@ def getCommit(objectId):
     data = getObject(objectId, expected = "commit").decode()
 
     commit = {}
+    commit["parents"] = []
 
     lines = iter(data.splitlines())
 
@@ -260,7 +264,7 @@ def getCommit(objectId):
         if key == "tree":
             commit["tree"] = value
         elif key == "parent":
-            commit["parent"] = value
+            commit["parents"].append(value)
         else:
             raise Exception(f"Unknow Key found: {key}")
     
@@ -268,6 +272,9 @@ def getCommit(objectId):
 
     return commit
 
+def deleteRef(ref, deref=True):
+    ref = _getRefInternal(ref, deref)[0]
+    os.remove(os.path.join(MGIT_DIR, ref))
 
 @mgit_required
 def createBranch(branchName, startPoint):
