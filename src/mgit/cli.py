@@ -17,24 +17,6 @@ def init():
     except FileExistsError as exception:
         print(exception)
 
-
-@app.command()
-def status():
-    branch = base.getBranchName()
-
-    if not branch:
-        print(f"HEAD in detached mode at {data.getOid('HEAD')}")   
-    else:
-        print(f"On branch {branch}") 
-
-@app.command()
-def status():
-    branch = base.getBranchName()
-    if not branch:
-        print(f"HEAD in datached mode at {data.getOid('@')}")
-    else:
-        print(f"On branch {branch}")
-
 @app.command()
 def hash_object(filepath):
     try:
@@ -98,12 +80,27 @@ def diff(commit_id = "HEAD"):
 
 @app.command()
 def status():
+    branch = base.getBranchName()
+
+    if not branch:
+        print(f"HEAD in detached mode at {data.getOid('HEAD')}")   
+    else:
+        print(f"On branch {branch}") 
+
+    MERGE_HEAD = None
+
+    try:
+        MERGE_HEAD = data.getRef('MERGE_HEAD').value
+    except Exception:
+        pass
+
+    if MERGE_HEAD:
+        print (f'Merging with {MERGE_HEAD[:10]}')
+    
     workingTree = base.getWorkingTree()
 
     objectId = data.getOid("HEAD")
-    print(objectId)
     commit = data.getCommit(objectId)
-    print(commit)
     tree = base.getTree(commit["tree"])
 
     for path, action in myDiff.iterChangedFiles(tree, workingTree):
@@ -150,9 +147,10 @@ def show(commit_id, unified_diff: bool = False):
     
     tree = base.getTree(commit["tree"])
     parentTree = None
-    if "parent" in commit:
-        parentCommit = data.getCommit(commit["parents"][0])
-        parentTree = base.getTree(parentCommit["tree"])
+    if "parents" in commit:
+        if commit["parents"] != []:
+            parentCommit = data.getCommit(commit["parents"][0])
+            parentTree = base.getTree(parentCommit["tree"])
 
     output = myDiff.diffTrees(parentTree, tree, unified_diff)
     for change in output:
@@ -192,8 +190,9 @@ def k():
     for oid in data.iterParentsAndCommits(oids):
         commit = data.getCommit(oid)
         dot += f'"{oid}" [shape=box style=filled label="{oid[:10]}"]\n'
-        if "parent" in commit:
-            dot += f'"{oid}" -> "{commit["parent"]}"\n'
+        if "parents" in commit:
+            for parent in commit["parents"]:
+                dot += f'"{oid}" -> "{parent}"\n'
     
     dot += '}'
 

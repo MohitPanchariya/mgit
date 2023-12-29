@@ -46,9 +46,20 @@ def commit(message):
     else:
         parent = data.getRef(HEAD.value).value
 
+    mergeHead = None
+    try:
+        mergeHead = data.getRef("MERGE_HEAD").value
+    except Exception:
+        pass
+
     # parent commit hash
     if parent:
         commitObject += f"parent {parent}\n"
+    # If this is a merge, a merge head will be
+    # present. Hence, write that as a parent too
+    if mergeHead:
+        commitObject += f"parent {mergeHead}\n"
+        data.deleteRef("MERGE_HEAD", deref=False)
     # leaving a line between the metadata('tree' object-id) and the commit message
     commitObject += "\n"
 
@@ -155,8 +166,8 @@ def log(objectId = None):
         for line in lines:
             print(textwrap.indent(line, "   "))
 
-        if "parent" in commit:
-            objectId = commit["parent"]
+        if "parents" in commit:
+            objectId = commit["parents"][0]
         else:
             objectId = None
 
@@ -260,8 +271,10 @@ def merge(branchName):
     # get the commit pointed to by the branch
     cOther = data.getCommit(branchName)
 
+    data.updateRef("MERGE_HEAD", data.RefValue(symbolic=False, value=branchName))
+
     readTreeMerged(cHEAD["tree"], cOther["tree"])
-    print("Merged into working tree")
+    print("Merged into working tree\n Please commit")
 
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)

@@ -33,6 +33,10 @@ def init():
     else:
         os.makedirs(MGIT_DIR)
         os.makedirs(os.path.join(MGIT_DIR, "objects"))
+        os.makedirs(os.path.join(MGIT_DIR, "ref", "heads"))
+        # create master branch on init
+        with open(os.path.join(MGIT_DIR, "ref", "heads", "master"), "w"):
+            pass
 
 @mgit_required
 def hashObject(data, type_ = "blob"):
@@ -196,6 +200,8 @@ def iterRefs(prefix = "", deref = True):
     the reference(object-id).
     '''
     refs = ["HEAD"]
+    if os.path.exists(os.path.join(MGIT_DIR, "MERGE_HEAD")):
+        refs.append("MERGE_HEAD")
     # Walk over all refs
     for root, _, filenames in os.walk(os.path.join(MGIT_DIR, "ref")):
         root = os.path.relpath(root, MGIT_DIR)
@@ -206,7 +212,8 @@ def iterRefs(prefix = "", deref = True):
     for refname in refs:
         if not refname.startswith(prefix):
             continue
-        yield refname, getRef(refname, deref)
+        ref = getRef(refname, deref=deref)
+        yield refname, ref
 
 
 @mgit_required
