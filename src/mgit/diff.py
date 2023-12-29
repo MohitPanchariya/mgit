@@ -1,6 +1,8 @@
 from collections import defaultdict
 import data
 import difflib
+from tempfile import NamedTemporaryFile as Temp
+import subprocess
 
 def diffBlobs(blobId1, blobId2):
     '''
@@ -69,3 +71,36 @@ def iterChangedFiles(fromTree, toTree):
         else:
             action = "Unchanged"
         yield path, action
+
+
+def mergeTrees(t_HEAD, t_other):
+    '''
+    Takes in two tree objects and returns back a tree object
+    with merged data of the files.
+    '''
+    tree = {}
+    for path, o_HEAD, o_other in groupTrees(t_HEAD, t_other):
+        tree[path] = mergeBlobs(o_HEAD, o_other)
+    return tree
+
+
+def mergeBlobs(o_HEAD, o_other):
+    '''
+    Returns a merged blob.
+    '''
+    # create temp files as the diff subprocess needs
+    # files to work with
+    with Temp () as f_HEAD, Temp () as f_other:
+        for oid, f in ((o_HEAD, f_HEAD), (o_other, f_other)):
+            if oid:
+                f.write (data.getObject(oid))
+                f.flush ()
+
+        with subprocess.Popen (
+            ['diff',
+             '-DHEAD', f_HEAD.name,
+             f_other.name
+            ], stdout=subprocess.PIPE) as proc:
+            output, _ = proc.communicate ()
+
+        return output

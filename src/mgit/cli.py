@@ -110,6 +110,10 @@ def status():
         print(f"File action: {path} ({action})")
 
 
+@app.command()
+def merge(branch_name):
+    base.merge(branch_name)
+
 def _printCommit(oid, ref = None):
     commit = data.getCommit(oid)
     printStr = f"commit {oid}"

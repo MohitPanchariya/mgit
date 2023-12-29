@@ -1,7 +1,7 @@
 import data
 import os
 import textwrap
-
+import diff
 
 def init():
     '''
@@ -242,6 +242,26 @@ def getWorkingTree():
                 result[path] = data.hashObject(fileContent.read())
 
     return result
+
+@data.mgit_required
+def readTreeMerged(t_HEAD, t_other):
+    _emptyDirectory()
+    for path, blob in diff.mergeTrees(getTree(t_HEAD), getTree(t_other)).items ():
+        os.makedirs (f'./{os.path.dirname (path)}', exist_ok=True)
+        with open (path, 'wb') as f:
+            f.write (blob)
+
+
+@data.mgit_required
+def merge(branchName):
+    HEAD = data.getRef("HEAD").value
+    
+    cHEAD = data.getCommit(HEAD)
+    # get the commit pointed to by the branch
+    cOther = data.getCommit(branchName)
+
+    readTreeMerged(cHEAD["tree"], cOther["tree"])
+    print("Merged into working tree")
 
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
