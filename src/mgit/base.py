@@ -255,9 +255,9 @@ def getWorkingTree():
     return result
 
 @data.mgit_required
-def readTreeMerged(t_HEAD, t_other):
+def readTreeMerged(t_base, t_HEAD, t_other):
     _emptyDirectory()
-    for path, blob in diff.mergeTrees(getTree(t_HEAD), getTree(t_other)).items ():
+    for path, blob in diff.mergeTrees(getTree(t_base), getTree(t_HEAD), getTree(t_other)).items ():
         os.makedirs (f'./{os.path.dirname (path)}', exist_ok=True)
         with open (path, 'wb') as f:
             f.write (blob)
@@ -267,13 +267,15 @@ def readTreeMerged(t_HEAD, t_other):
 def merge(branchName):
     HEAD = data.getRef("HEAD").value
     
+    mergeBase = getMergeBase(branchName, HEAD)
+    cBase = data.getCommit(mergeBase)
     cHEAD = data.getCommit(HEAD)
     # get the commit pointed to by the branch
     cOther = data.getCommit(branchName)
 
     data.updateRef("MERGE_HEAD", data.RefValue(symbolic=False, value=branchName))
 
-    readTreeMerged(cHEAD["tree"], cOther["tree"])
+    readTreeMerged(cBase["tree"], cHEAD["tree"], cOther["tree"])
     print("Merged into working tree\n Please commit")
 
 @data.mgit_required
