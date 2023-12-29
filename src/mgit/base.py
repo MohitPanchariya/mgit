@@ -276,6 +276,14 @@ def merge(branchName):
     readTreeMerged(cHEAD["tree"], cOther["tree"])
     print("Merged into working tree\n Please commit")
 
+@data.mgit_required
+def getMergeBase(oid1, oid2):
+    parents1 = set(data.iterParentsAndCommits({oid1}))
+
+    for oid in data.iterParentsAndCommits({oid2}):
+        if oid in parents1:
+            return oid
+
 def _createTree(objectId, basePath):
     objectPath = os.path.join(".mgit", "objects", objectId)
 

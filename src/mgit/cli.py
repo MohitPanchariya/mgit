@@ -111,6 +111,11 @@ def status():
 def merge(branch_name):
     base.merge(branch_name)
 
+
+@app.command
+def merge_base(commit_id_1, commit_id_2):
+    print(base.getMergeBase(commit_id_1, commit_id_2))
+
 def _printCommit(oid, ref = None):
     commit = data.getCommit(oid)
     printStr = f"commit {oid}"
