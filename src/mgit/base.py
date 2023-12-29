@@ -273,7 +273,16 @@ def merge(branchName):
     # get the commit pointed to by the branch
     cOther = data.getCommit(branchName)
 
+    if mergeBase == HEAD:
+        readTree(cOther["tree"])
+        data.updateRef("HEAD", data.RefValue(symbolic=True, value=branchName))
+        print ('Fast-forward merge, no need to commit')
+        return
+
     data.updateRef("MERGE_HEAD", data.RefValue(symbolic=False, value=branchName))
+
+    cBase = data.getCommit (mergeBase)
+    cHEAD = data.getCommit(HEAD)
 
     readTreeMerged(cBase["tree"], cHEAD["tree"], cOther["tree"])
     print("Merged into working tree\n Please commit")
